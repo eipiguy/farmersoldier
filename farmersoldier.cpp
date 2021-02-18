@@ -14,15 +14,27 @@
 // Place
 
 
-Place :: Place( const int xIn,          const int yIn,
+Place :: Place( const int playerIn,
+                const int xIn,          const int yIn,
                 const bool hasFarmer,   const int numSoldiers )
-        : x(xIn), y(yIn){
+        : player(playerIn), x(xIn), y(yIn){
 
-        if(hasFarmer);
+        std::cout << "Creating place (" << xIn << ',' << yIn 
+                << ") with ";
+        
+        if(hasFarmer){
+                localFarmer = std::unique_ptr<Farmer>( new Farmer(false) );
+                std::cout << "1 farmer";
+        }else   std::cout << "no farmer";
+        
         if(numSoldiers>0){
-
+                localSoldiers = std::unique_ptr<SoldierGroup>
+                        ( new SoldierGroup( 1 ) );
+                std::cout << " and " << numSoldiers 
+                        << " soldiers" << std::endl;
+                
         }if(numSoldiers<0){
-                std::cout << "Cannot have negative soldiers" << std::endl;
+                std::cout << "\nCannot have negative soldiers" << std::endl;
         }
 }
 
@@ -31,16 +43,23 @@ Place :: Place( const int xIn,          const int yIn,
 // Player
 
 Player :: Player(       const int playerNumber,
-                        const int widthIn, const int heightIn ){
+                        const int widthIn, const int heightIn,
+                        std::unique_ptr<Place> startingPlace    ){
 
-        const int xLoc = (widthIn-1)*(playerNumber%2);
-        const int yLoc = (heightIn-1)*((playerNumber%2)-1);
-        
-        //friendlyPlaces.emplace_back( xLoc, yLoc, 1, 1 );
-        std::cout << "New player " << playerNumber 
-                << " added friendly place at (" << xLoc << ',' << yLoc
-                << ") with\n"
-                << "1 farmer and 1 soldier" << std::endl;
+        std::cout << "Creating player number " << playerNumber << std::endl;
+
+        std::cout << "Player number " << playerNumber
+                << " adding starting place at (" << startingPlace -> getX()
+                << ',' << startingPlace -> getY() 
+                << ") with 1 farmer, and 1 soldier" << std::endl;
+
+        friendlyPlaces.push_back( std::move(startingPlace) );
+
+        std::cout << "Player " << playerNumber 
+                << " added friendly place at (" 
+                << friendlyPlaces.back() -> getX() << ',' 
+                << friendlyPlaces.back() -> getY()
+                << ") with 1 farmer and 1 soldier" << std::endl;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -50,10 +69,29 @@ void BoardState :: addPlayer(){
         
         const int np = players.size();
         if( np < maxPlayers ){
-                players.emplace_back( np, width, height );
-                std::cout << "Added player number " << np+1 << std::endl;
+                std::cout << "\nAdding player number " << np << std::endl;
+
+                const int xLoc = (width-1) * ( np %2 );
+                const int yLoc = (height-1) * ( ( (np/2)+(np%2) ) %2 ) ;
+                
+                places.emplace_back( np, xLoc, yLoc, true, 1 );
+
+                players.emplace_back( np, width, height, 
+                                std::move( 
+                                        std::unique_ptr<Place>(&places.back()) 
+                                ) );
+
+                std::cout << "Added player number " << np << std::endl;
         }else{
                 std::cout << "Failed to add player;" << std::endl;
                 std::cout << "already have max 4 players!" << std::endl;
         }
+}
+
+/*****************************************************************************/
+
+void BoardState :: printState(){
+
+        
+
 }

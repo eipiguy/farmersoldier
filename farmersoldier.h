@@ -16,7 +16,8 @@ class BoardState;
 class Piece{
 
         public:
-        Piece( const bool newChild ) : child(newChild), moved(false) {}
+        Piece( const bool newChild ) : child( newChild ), moved( false ) {}
+        ~Piece(){ std::cout << "Piece removed" << std::endl; }
 
         int move( const int x, const int y );
 
@@ -29,6 +30,8 @@ class Piece{
 class Farmer : public Piece{
 
         public:
+        Farmer( const bool newChild ) : Piece( newChild ) {}
+        ~Farmer(){ std::cout << "Farmer removed" << std::endl;}
 
         private:
 };
@@ -39,8 +42,10 @@ class SoldierGroup : public Piece{
 
         public:
         SoldierGroup( const int numIn ) 
-                : Piece(false), numSoldiers(numIn), fedSoldiers(0) {}
-                
+                : Piece( false ), numSoldiers( numIn ), fedSoldiers( 0 ) {}
+
+        ~SoldierGroup(){ std::cout << "SoldierGroup removed" << std::endl;}
+
         int needFood(){ return numSoldiers - fedSoldiers; }
         void feed();
         
@@ -53,10 +58,17 @@ class SoldierGroup : public Piece{
 class Place{
         
         public:
-        Place(  const int xIn,          const int yIn,
+        Place(  const int playerIn,
+                const int xIn,          const int yIn,
                 const bool hasFarmer,   const int numSoldiers );
+        //~Place(){ std::cout << "Place removed"; }
+
+
+        int getX(){ return x; }
+        int getY(){ return y; }
 
         private:
+        int player;
         int x, y;
         std::unique_ptr<Farmer> localFarmer = nullptr;
         std::unique_ptr<SoldierGroup> localSoldiers = nullptr;
@@ -67,8 +79,10 @@ class Player{
 
         public:
         Player( const int playerNumber,
-                const int widthIn, const int heightIn );
-        
+                const int widthIn, const int heightIn,
+                std::unique_ptr<Place> startingPlace );
+        //~Player(){ std::cout << "Player removed"; }        
+
         void starve();
         bool hasPieces( const int x, const int y );
         void attack(    const int fromX,        const int fromY,
@@ -86,13 +100,16 @@ class BoardState{
                         const int heightIn)
                 :       width(widthIn),
                         height(heightIn){
-                std::cout << "New board, size: " 
+                std::cout << "\nNew board, size: " 
                         << width << " by " << height << std::endl;
         }
+        ~BoardState(){ std::cout << "BoardState removed" << std::endl; }
 
         void addPlayer();
         void startGame();
         void nextTurn();
+
+        void printState();
 
         private:
         const int maxPlayers = 4;
