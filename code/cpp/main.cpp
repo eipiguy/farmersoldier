@@ -1,14 +1,15 @@
 #include "farmersoldier.h"
 
+typedef Game::Player Player;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 int main(int argc, char** argv){
 
         const int w = 3, h = 3;         // board size
-        const int p = 4;                // number of players
+        Game game(w,h);
+        game.print();
 
-        BoardState board(w,h);
-        for(int i=0;i<p;++i){ board.addPlayer(); }
-
+        std::unique_ptr<Player> player1 = game.addPlayer();
         return 0;
 }
